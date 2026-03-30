@@ -8,6 +8,7 @@ Also sends the summary by email after each job cycle.
 import logging
 import smtplib
 from datetime import datetime
+from email.header import Header
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import List
@@ -166,7 +167,7 @@ def send_email_report(results: List[dict]) -> None:
     """
 
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
+    msg["Subject"] = Header(subject, "utf-8")
     msg["From"]    = GMAIL_ADDRESS
     msg["To"]      = NOTIFICATION_EMAIL
     msg.attach(MIMEText(plain_body, "plain", "utf-8"))
