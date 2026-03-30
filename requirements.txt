@@ -1,0 +1,6 @@
+selenium==4.21.0
+undetected-chromedriver==3.5.5
+python-dotenv==1.0.1
+PyJWT==2.8.0
+cryptography==42.0.8
+requests==2.32.5

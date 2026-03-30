@@ -1,0 +1,8 @@
+.env
+vfs.db
+*.pyc
+__pycache__/
+.chrome_profile/
+/tmp/vfs_chrome_profile/
+chromedriver_*
+*.log
