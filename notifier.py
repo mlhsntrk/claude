@@ -177,7 +177,7 @@ def send_email_report(results: List[dict]) -> None:
             smtp.ehlo()
             smtp.starttls()
             smtp.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
-            smtp.sendmail(GMAIL_ADDRESS, NOTIFICATION_EMAIL, msg.as_string())
+            smtp.send_message(msg)
         logging.info(f"Email report sent to {NOTIFICATION_EMAIL}")
     except smtplib.SMTPAuthenticationError:
         logging.error("Email report failed: Gmail authentication error. Check GMAIL_APP_PASSWORD in .env")
