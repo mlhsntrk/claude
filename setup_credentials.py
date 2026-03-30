@@ -5,7 +5,7 @@ Run this once to:
   1. Generate a MASTER_KEY (Fernet key) and write it to .env
   2. Prompt for your VFS Global email and password
   3. Encrypt the password with the MASTER_KEY
-  4. Store the encrypted credentials in vfs.db
+  4. Store the credentials in vfs.db (email plaintext, password encrypted)
 
 Usage:
     python setup_credentials.py
@@ -73,9 +73,9 @@ def main() -> None:
             print("Aborted. Existing credentials kept.")
             sys.exit(0)
 
-    # Prompt for VFS credentials
+    # Prompt for VFS email and password
     print("Enter your VFS Global login credentials.")
-    print("(These will be stored encrypted — never in plaintext)\n")
+    print("(Password will be stored encrypted — never in plaintext)\n")
 
     email = input("VFS Email: ").strip()
     if not email:
@@ -96,10 +96,10 @@ def main() -> None:
 
     print("\n✓ Credentials saved successfully.")
     print(f"  Email:    {email}")
-    print(f"  Password: {'*' * len(password)}")
+    print(f"  Password: {'*' * len(password)}  (Fernet-encrypted in DB)")
     print(f"  Database: {db.DB_PATH}")
     print("\nNext steps:")
-    print("  1. Add your GMAIL_APP_PASSWORD to .env")
+    print("  1. Add GMAIL_APP_PASSWORD and NOTIFICATION_EMAIL to .env")
     print("  2. Run: python main.py --once")
 
 
