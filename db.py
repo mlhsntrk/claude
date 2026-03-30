@@ -24,6 +24,7 @@ from config import DB_PATH
 _DDL = """
 CREATE TABLE IF NOT EXISTS credentials (
     id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+    email              TEXT    NOT NULL,
     encrypted_password BLOB    NOT NULL,
     created_at         TEXT    NOT NULL
 );
@@ -64,27 +65,27 @@ def init_db() -> None:
 # Credentials
 # ---------------------------------------------------------------------------
 
-def save_credentials(plaintext_password: str, master_key: str) -> None:
-    """Encrypt and store VFS password. Replaces any existing row."""
+def save_credentials(email: str, plaintext_password: str, master_key: str) -> None:
+    """Encrypt and store VFS credentials. Replaces any existing row."""
     fernet = Fernet(master_key.encode())
     encrypted = fernet.encrypt(plaintext_password.encode())
     now = datetime.now(timezone.utc).isoformat()
     with _connect() as conn:
         conn.execute("DELETE FROM credentials")
         conn.execute(
-            "INSERT INTO credentials (encrypted_password, created_at) VALUES (?, ?)",
-            (encrypted, now),
+            "INSERT INTO credentials (email, encrypted_password, created_at) VALUES (?, ?, ?)",
+            (email, encrypted, now),
         )
-    logging.info("Password saved to DB (Fernet-encrypted).")
+    logging.info("Credentials saved to DB (password Fernet-encrypted).")
 
 
-def get_encrypted_password() -> Optional[bytes]:
-    """Return the encrypted password blob, or None if not set."""
+def get_credentials() -> Optional[tuple[str, bytes]]:
+    """Return (email, encrypted_password_blob) or None."""
     with _connect() as conn:
-        row = conn.execute("SELECT encrypted_password FROM credentials LIMIT 1").fetchone()
+        row = conn.execute("SELECT email, encrypted_password FROM credentials LIMIT 1").fetchone()
     if row is None:
         return None
-    return bytes(row["encrypted_password"])
+    return row["email"], bytes(row["encrypted_password"])
 
 
 def decrypt_password(encrypted_password: bytes, master_key: str) -> str:

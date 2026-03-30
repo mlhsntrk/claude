@@ -3,9 +3,9 @@ One-time credential setup script.
 
 Run this once to:
   1. Generate a MASTER_KEY (Fernet key) and write it to .env
-  2. Prompt for your VFS Global password (email is read from VFS_EMAIL in .env)
+  2. Prompt for your VFS Global email and password
   3. Encrypt the password with the MASTER_KEY
-  4. Store the encrypted password in vfs.db
+  4. Store the credentials in vfs.db (email plaintext, password encrypted)
 
 Usage:
     python setup_credentials.py
@@ -57,32 +57,30 @@ def main() -> None:
     _ensure_env_file()
     master_key = _get_or_create_master_key()
 
-    # Import db/config after .env is ready
+    # Import db after .env is ready (config reads MASTER_KEY from env)
     import db
-    from config import VFS_EMAIL
 
     db.init_db()
 
-    # Validate that VFS_EMAIL is set in .env
-    if not VFS_EMAIL:
-        print("Error: VFS_EMAIL is not set in .env")
-        print("  Add the line:  VFS_EMAIL=your@email.com  to your .env file first.")
-        sys.exit(1)
-
-    # Check if a password is already stored
-    existing = db.get_encrypted_password()
+    # Check if credentials already exist
+    existing = db.get_credentials()
     if existing:
+        email_existing, _ = existing
         overwrite = input(
-            f"A password is already stored for '{VFS_EMAIL}'. Overwrite? [y/N]: "
+            f"Credentials already stored for '{email_existing}'. Overwrite? [y/N]: "
         ).strip().lower()
         if overwrite != "y":
-            print("Aborted. Existing password kept.")
+            print("Aborted. Existing credentials kept.")
             sys.exit(0)
 
-    # Prompt for VFS password only
-    print(f"VFS Email (from .env): {VFS_EMAIL}")
-    print("Enter your VFS Global password.")
-    print("(Will be stored encrypted — never in plaintext)\n")
+    # Prompt for VFS email and password
+    print("Enter your VFS Global login credentials.")
+    print("(Password will be stored encrypted — never in plaintext)\n")
+
+    email = input("VFS Email: ").strip()
+    if not email:
+        print("Error: Email cannot be empty.")
+        sys.exit(1)
 
     password = getpass.getpass("VFS Password: ")
     if not password:
@@ -94,10 +92,10 @@ def main() -> None:
         print("Error: Passwords do not match.")
         sys.exit(1)
 
-    db.save_credentials(password, master_key)
+    db.save_credentials(email, password, master_key)
 
-    print("\n✓ Password saved successfully.")
-    print(f"  Email:    {VFS_EMAIL}  (from .env)")
+    print("\n✓ Credentials saved successfully.")
+    print(f"  Email:    {email}")
     print(f"  Password: {'*' * len(password)}  (Fernet-encrypted in DB)")
     print(f"  Database: {db.DB_PATH}")
     print("\nNext steps:")
