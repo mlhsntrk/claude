@@ -18,7 +18,7 @@ from config import TARGET_COUNTRIES, REPEAT_INTERVAL_MINUTES
 from db import init_db, get_all_results
 from utils.browser import create_driver
 from checker import check_country
-from notifier import print_results, build_notification_message
+from notifier import print_results, build_notification_message, send_email_report
 
 
 def setup_logging() -> None:
@@ -94,6 +94,9 @@ def main() -> None:
 
         # Also log the compact notification message
         logging.info("\n" + build_notification_message(results))
+
+        # Send results by email
+        send_email_report(results)
 
         if args.once:
             logging.info("--once flag set. Exiting after single cycle.")

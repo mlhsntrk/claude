@@ -10,9 +10,15 @@ load_dotenv()
 # --- Encryption ---
 MASTER_KEY: str = os.environ.get("MASTER_KEY", "")
 
-# --- Gmail IMAP (for OTP) ---
+# --- VFS Global login credentials ---
+VFS_EMAIL: str = os.environ.get("VFS_EMAIL", "")
+
+# --- Gmail IMAP (for OTP) + SMTP (for result notifications) ---
 GMAIL_ADDRESS: str = os.environ.get("GMAIL_ADDRESS", "claudeconnector23@gmail.com")
 GMAIL_APP_PASSWORD: str = os.environ.get("GMAIL_APP_PASSWORD", "")
+
+# --- Notification email (results are sent here after each cycle) ---
+NOTIFICATION_EMAIL: str = os.environ.get("NOTIFICATION_EMAIL", "")
 
 # --- Tuning ---
 OTP_WAIT_SECONDS: int = int(os.getenv("OTP_WAIT_SECONDS", "30"))

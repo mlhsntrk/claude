@@ -19,13 +19,14 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 from config import (
     MASTER_KEY,
+    VFS_EMAIL,
     FORM_APPLICATION_CENTER,
     FORM_CATEGORY,
     FORM_SUB_CATEGORY,
     NO_APPOINTMENT_TEXT,
     CONTINUE_BUTTON_TEXT,
 )
-from db import get_credentials, decrypt_password, get_valid_jwt, save_jwt, save_result
+from db import get_encrypted_password, decrypt_password, get_valid_jwt, save_jwt, save_result
 from gmail_otp import fetch_latest_otp
 from utils.waits import (
     wait_clickable, wait_visible, wait_for_element,
@@ -139,10 +140,12 @@ def check_country(driver: WebDriver, country: dict) -> dict:
 
 def _full_login(driver: WebDriver, name: str, code: str, url: str) -> None:
     """Navigate to login URL, enter credentials, handle OTP, capture JWT."""
-    creds = get_credentials()
-    if not creds:
-        raise RuntimeError("No credentials found in DB. Run setup_credentials.py first.")
-    email, encrypted_pw = creds
+    if not VFS_EMAIL:
+        raise RuntimeError("VFS_EMAIL is not set in .env")
+    encrypted_pw = get_encrypted_password()
+    if not encrypted_pw:
+        raise RuntimeError("No password found in DB. Run setup_credentials.py first.")
+    email = VFS_EMAIL
     password = decrypt_password(encrypted_pw, MASTER_KEY)
 
     logging.info(f"[{name}] Navigating to: {url}")
